@@ -1,0 +1,40 @@
+
+CC		= gcc
+#SVNVERS         = $(shell git rev-parse --short HEAD)
+CFLAGS          = -Wall -g -O -Ilibusb-win32 -Ihidapi -DSVNVERSION='"$(SVNVERS)"' 
+LDFLAGS         = -s
+
+# Windows
+LIBS            += -lhid -lsetupapi
+HIDSRC          = hidapi/hid-windows.c
+
+PROG_OBJS       = pic32prog.o \
+				  target.o \
+				  executive.o \
+				  hid.o \
+				  adapter-usbpic.o \
+				  adapter-pickit2.o \
+                  family-mx1.o \
+				  family-mx3.o \
+				  family-mz.o \
+				  serial.o
+				  
+#LIBS           += -Llibusb-win32/x86 -lusb0_x86
+all:		pic32prog.exe
+
+pic32prog.exe:	$(PROG_OBJS)
+		$(CC) $(LDFLAGS) -o $@ $(PROG_OBJS) $(LIBS)
+
+hid.o:          $(HIDSRC)
+		$(CC) $(CFLAGS) -c -o $@ $<
+
+### adapter-stk500v2.o serial.o
+## adapter-an1388.o: adapter-an1388.c adapter.h hidapi/hidapi.h pic32.h
+##adapter-hidboot.o: adapter-hidboot.c adapter.h hidapi/hidapi.h pic32.h
+##adapter-mpsse.o: adapter-mpsse.c adapter.h
+##adapter-usbjtag.o: adapter-usbjtag.c adapter.h hidapi/hidapi.h pic32.h
+adapter-usbpic.o: adapter-usbpic.c adapter.h hidapi/hidapi.h pic32.h
+adapter-pickit2.o: adapter-pickit2.c adapter.h pickit2.h pic32.h
+executive.o: executive.c pic32.h
+pic32prog.o: pic32prog.c target.h localize.h
+target.o: target.c target.h adapter.h localize.h pic32.h
